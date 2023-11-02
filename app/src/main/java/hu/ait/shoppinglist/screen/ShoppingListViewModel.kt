@@ -38,7 +38,8 @@ class ShoppingListViewModel : ViewModel() {
             title = shoppingItem.title,
             description = shoppingItem.description,
             price = shoppingItem.price,
-            isPurchased = value
+            isPurchased = value,
+            type = shoppingItem.type
         )
 
         _shoppingList[index] = newItem

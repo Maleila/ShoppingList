@@ -3,6 +3,7 @@ package hu.ait.shoppinglist.screen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -49,6 +50,12 @@ import androidx.compose.ui.window.Dialog
 import hu.ait.shoppinglist.data.ShoppingItem
 import java.util.UUID
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.runtime.remember
+import hu.ait.shoppinglist.data.ItemType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -133,7 +140,7 @@ private fun AddNewTodoForm(
             mutableStateOf("")
         }
         var itemType by rememberSaveable {
-            mutableStateOf("")
+            mutableStateOf(ItemType.FOOD)
         }
         var itemBought by rememberSaveable {
             mutableStateOf(false)
@@ -177,6 +184,21 @@ private fun AddNewTodoForm(
                 },
                 label = { Text(text = "Description") }
             )
+            SpinnerSample(
+                listOf("Food", "Electronic", "Household"),
+                preselected = "Food",
+                onSelectionChanged = {
+                    if(it == "Food") {
+                        itemType = ItemType.FOOD
+                    } else if(it == "Electronic") {
+                        itemType = ItemType.ELECTRONIC
+                    } else {
+                        itemType = ItemType.HOUSEHOLD
+                    }
+                },
+                modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -195,6 +217,7 @@ private fun AddNewTodoForm(
                             itemDescription,
                             itemPrice,
                             if (itemBought) true else false,
+                            itemType
                         )
                     )
 
@@ -238,13 +261,13 @@ fun ItemCard(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-//                Image(
-//                    painter = painterResource(id = shoppingItem.type.getIcon()), //add this
-//                    contentDescription = "Type",
-//                    modifier = Modifier
-//                        .size(40.dp)
-//                        .padding(end = 10.dp)
-//                )
+                Image(
+                    painter = painterResource(id = shoppingItem.type.getIcon()),
+                    contentDescription = "Type",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(end = 10.dp)
+                )
                 Column {
                     Text(shoppingItem.title, modifier = Modifier.fillMaxWidth(0.2f))
                     Text(
@@ -303,6 +326,51 @@ fun ItemCard(
                         fontSize = 12.sp,
                     )
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun SpinnerSample(
+    list: List<String>,
+    preselected: String,
+    onSelectionChanged: (myData: String) -> Unit, modifier: Modifier = Modifier
+){
+    var selected by remember { mutableStateOf(preselected) }
+    var expanded by remember { mutableStateOf(false) } // initial value
+    OutlinedCard(
+        modifier = modifier.clickable {
+            expanded = !expanded
+        } ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top,
+        ) {
+            Text(
+                text = selected,
+                modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp, vertical = 8.dp))
+            Icon(Icons.Outlined.ArrowDropDown, null, modifier = Modifier.padding(8.dp))
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }, modifier = Modifier.fillMaxWidth()
+            ) {
+                list.forEach { listEntry ->
+                    DropdownMenuItem(
+                        onClick = {
+                            selected = listEntry
+                            expanded = false
+                            onSelectionChanged (selected)
+                        },
+                        text = {
+                            Text(
+                                text = listEntry,
+                                modifier = Modifier
+                            )
+                        },
+                    )
+                }
             }
         }
     }
