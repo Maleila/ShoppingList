@@ -50,11 +50,13 @@ import androidx.compose.ui.window.Dialog
 import hu.ait.shoppinglist.data.ShoppingItem
 import java.util.UUID
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.remember
+import androidx.compose.ui.text.input.KeyboardType
 import hu.ait.shoppinglist.data.ItemType
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -171,6 +173,7 @@ private fun AddNewTodoForm(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = itemPrice.toString(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 onValueChange = {
                     itemPrice = it.toInt()
                 },
