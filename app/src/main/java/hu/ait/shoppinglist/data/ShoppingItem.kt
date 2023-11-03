@@ -7,7 +7,7 @@ data class ShoppingItem(
     val id: String,
     val title:String,
     val description:String,
-    val price:Int,
+    val price:String,
     var isPurchased: Boolean,
     var type:ItemType)
 

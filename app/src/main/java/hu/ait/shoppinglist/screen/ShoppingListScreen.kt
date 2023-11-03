@@ -51,6 +51,7 @@ import hu.ait.shoppinglist.data.ShoppingItem
 import java.util.UUID
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -65,8 +66,6 @@ fun ShoppingListScreen(
     modifier: Modifier = Modifier,
     shoppingViewModel: ShoppingListViewModel = viewModel()
 ) {
-
-
     var showAddItemDialog by rememberSaveable {
         mutableStateOf(false)
     }
@@ -107,7 +106,6 @@ fun ShoppingListScreen(
                     { showAddItemDialog = false }
                 )
             }
-
             if (shoppingViewModel.getAllShoppingList().isEmpty())
                 Text(text = "No items")
             else {
@@ -135,6 +133,53 @@ private fun AddNewTodoForm(
     shoppingViewModel: ShoppingListViewModel,
     onDialogDismiss: () -> Unit = {}
 ) {
+    var nameErrorState by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var descriptionErrorState by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var priceErrorState by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var errorText by rememberSaveable {
+        mutableStateOf("")
+    }
+    var nameErrorText by rememberSaveable {
+        mutableStateOf("")
+    }
+    var descriptionErrorText by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    fun validatePrice(text: String) {
+        val allDigits = text.all { char -> char.isDigit() }
+        errorText = "This field can be number only"
+        if(!allDigits || text.trim() =="") {
+            priceErrorState = true
+        } else {
+            priceErrorState = false
+        }
+    }
+
+    fun validateTitle(text: String) {
+        if (text.trim() == "") {
+            nameErrorState = true
+            nameErrorText = "Please enter an item name"
+        } else {
+            nameErrorState = false
+        }
+    }
+
+    fun validateDescription(text: String) {
+        if (text.trim() == "") {
+            descriptionErrorState = true
+            descriptionErrorText = "Please enter an item name"
+        } else {
+            descriptionErrorState = false
+        }
+    }
+
     Dialog(
         onDismissRequest = onDialogDismiss
     ) {
@@ -148,7 +193,7 @@ private fun AddNewTodoForm(
             mutableStateOf(false)
         }
         var itemPrice by rememberSaveable {
-            mutableStateOf(0)
+            mutableStateOf("")
         }
         var itemDescription by rememberSaveable {
             mutableStateOf("")
@@ -165,28 +210,79 @@ private fun AddNewTodoForm(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = itemTitle,
+                trailingIcon = {
+                    if (nameErrorState) {
+                        Icon(
+                            Icons.Filled.Warning, "error",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 onValueChange = {
                     itemTitle = it
+                    validateTitle(itemTitle)
                 },
                 label = { Text(text = "Item name") }
             )
+            if (nameErrorState) {
+                Text(
+                    text = nameErrorText,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = itemPrice.toString(),
+                value = itemPrice,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                trailingIcon = {
+                    if (priceErrorState) {
+                        Icon(
+                            Icons.Filled.Warning, "error",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 onValueChange = {
-                    itemPrice = it.toInt()
+                    itemPrice = it
+                    validatePrice(itemPrice)
                 },
                 label = { Text(text = "Price") }
             )
+            if (priceErrorState) {
+                Text(
+                    text = errorText,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = itemDescription,
+                trailingIcon = {
+                    if (descriptionErrorState) {
+                        Icon(
+                            Icons.Filled.Warning, "error",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 onValueChange = {
                     itemDescription = it
+                    validateDescription(itemDescription)
                 },
                 label = { Text(text = "Description") }
             )
+            if (descriptionErrorState) {
+                Text(
+                    text = descriptionErrorText,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
             SpinnerSample(
                 listOf("Food", "Electronic", "Household"),
                 preselected = "Food",
@@ -200,8 +296,8 @@ private fun AddNewTodoForm(
                     }
                 },
                 modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp))
+                    .fillMaxWidth()
+                    .padding(top = 10.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -213,19 +309,23 @@ private fun AddNewTodoForm(
 
             Row {
                 Button(onClick = {
-                    shoppingViewModel.addToList(
-                        ShoppingItem(
-                            UUID.randomUUID().toString(),
-                            itemTitle,
-                            itemDescription,
-                            itemPrice,
-                            if (itemBought) true else false,
-                            itemType
+                    validateDescription(itemDescription)
+                    validatePrice(itemPrice)
+                    validateTitle(itemTitle)
+                    if(!nameErrorState && !priceErrorState && !descriptionErrorState) {
+                        shoppingViewModel.addToList(
+                            ShoppingItem(
+                                UUID.randomUUID().toString(),
+                                itemTitle,
+                                itemDescription,
+                                itemPrice,
+                                if (itemBought) true else false,
+                                itemType
+                            )
                         )
-                    )
-
-                    onDialogDismiss()
-                    itemTitle = "" //reset fields to empty
+                        onDialogDismiss()
+                        itemTitle = "" //reset fields to empty
+                    }
                 }) {
                     Text(text = "Save")
                 }
@@ -352,8 +452,8 @@ fun SpinnerSample(
             Text(
                 text = selected,
                 modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 16.dp, vertical = 8.dp))
+                    .weight(1f)
+                    .padding(horizontal = 16.dp, vertical = 8.dp))
             Icon(Icons.Outlined.ArrowDropDown, null, modifier = Modifier.padding(8.dp))
             DropdownMenu(
                 expanded = expanded,
