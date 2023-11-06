@@ -2,50 +2,56 @@ package hu.ait.shoppinglist.screen
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import hu.ait.shoppinglist.data.ShoppingDAO
 import hu.ait.shoppinglist.data.ShoppingItem
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ShoppingListViewModel : ViewModel() {
+@HiltViewModel
+class ShoppingListViewModel @Inject constructor(
+    private val shoppingDAO: ShoppingDAO
+) : ViewModel() {
 
-    //underscore indicates private var
-    private var _shoppingList =
-        mutableStateListOf<ShoppingItem>()
-
-    fun getAllShoppingList(): List<ShoppingItem> {
-        return _shoppingList
+    fun getAllShoppingList(): Flow<List<ShoppingItem>> {
+        return shoppingDAO.getAllShoppingList()
     }
 
-    fun getAllItemsNum(): Int {
-        return _shoppingList.size
+    suspend fun getAllItemsNum(): Int {
+        return shoppingDAO.getAllItemsNum()
     }
 
     fun addToList(shoppingItem: ShoppingItem) {
-        _shoppingList.add(shoppingItem)
+        viewModelScope.launch {
+            shoppingDAO.insert(shoppingItem)
+        }
     }
 
     fun removeItem(shoppingItem: ShoppingItem) {
-        _shoppingList.remove(shoppingItem)
+        viewModelScope.launch {
+            shoppingDAO.delete(shoppingItem)
+        }
     }
 
-    fun editItem(originalItem: ShoppingItem, editedItem: ShoppingItem) {
-        val index = _shoppingList.indexOf(originalItem)
-        _shoppingList[index] = editedItem
+    fun editItem(editedItem: ShoppingItem) {
+        viewModelScope.launch {
+            shoppingDAO.update(editedItem)
+        }
     }
 
     fun changeBoughtState(shoppingItem: ShoppingItem, value: Boolean) {
-        val index = _shoppingList.indexOf(shoppingItem)
-
-        val newItem = shoppingItem.copy(
-            title = shoppingItem.title,
-            description = shoppingItem.description,
-            price = shoppingItem.price,
-            isPurchased = value,
-            type = shoppingItem.type
-        )
-
-        _shoppingList[index] = newItem
+        val newItem = shoppingItem.copy()
+        newItem.isPurchased = value
+        viewModelScope.launch {
+            shoppingDAO.update(newItem)
+        }
     }
 
     fun clearAllItems() {
-        _shoppingList.clear()
+        viewModelScope.launch {
+            shoppingDAO.deleteAllItems()
+        }
     }
 }

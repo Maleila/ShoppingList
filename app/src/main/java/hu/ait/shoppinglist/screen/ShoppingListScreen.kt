@@ -56,18 +56,29 @@ import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.hilt.navigation.compose.hiltViewModel
 import hu.ait.shoppinglist.data.ItemType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShoppingListScreen(
     modifier: Modifier = Modifier,
-    shoppingViewModel: ShoppingListViewModel = viewModel()
+    shoppingViewModel: ShoppingListViewModel = hiltViewModel()
 ) {
     var showAddItemDialog by rememberSaveable {
         mutableStateOf(false)
+    }
+
+    val itemList by shoppingViewModel.getAllShoppingList().collectAsState(emptyList())
+
+    val coroutineScope = rememberCoroutineScope()
+
+    var itemToEdit: ShoppingItem? by rememberSaveable {
+        mutableStateOf(null)
     }
 
     Column {
@@ -93,6 +104,7 @@ fun ShoppingListScreen(
 //                    Icon(Icons.Filled.Info, null)
 //                }
                 IconButton(onClick = {
+                    itemToEdit = null
                     showAddItemDialog = true
                 }) {
                     Icon(Icons.Filled.AddCircle, null)
@@ -103,21 +115,24 @@ fun ShoppingListScreen(
 
             if (showAddItemDialog) {
                 AddNewTodoForm(shoppingViewModel,
-                    { showAddItemDialog = false }
+                    { showAddItemDialog = false },
+                    itemToEdit
                 )
             }
-            if (shoppingViewModel.getAllShoppingList().isEmpty())
+
+            if (itemList.isEmpty())
                 Text(text = "No items")
             else {
                 LazyColumn(modifier = Modifier.fillMaxHeight()) {
-                    items(shoppingViewModel.getAllShoppingList()) {
+                    items(itemList) {
                         ItemCard(shoppingItem = it,
                             onRemoveItem = { shoppingViewModel.removeItem(it) },
                             onBoughtCheckChange = { checkState ->
                                 shoppingViewModel.changeBoughtState(it, checkState)
                             },
                             onEditItem = { editedItem ->
-                                shoppingViewModel.editItem(it, editedItem)
+                                itemToEdit = editedItem
+                                showAddItemDialog = true
                             }
                         )
                     }
@@ -131,7 +146,8 @@ fun ShoppingListScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun AddNewTodoForm(
     shoppingViewModel: ShoppingListViewModel,
-    onDialogDismiss: () -> Unit = {}
+    onDialogDismiss: () -> Unit = {},
+    itemToEdit: ShoppingItem? = null
 ) {
     var nameErrorState by rememberSaveable {
         mutableStateOf(false)
@@ -184,19 +200,19 @@ private fun AddNewTodoForm(
         onDismissRequest = onDialogDismiss
     ) {
         var itemTitle by rememberSaveable {
-            mutableStateOf("")
+            mutableStateOf(itemToEdit?.title ?: "")
         }
         var itemType by rememberSaveable {
-            mutableStateOf(ItemType.FOOD)
+            mutableStateOf(itemToEdit?.type ?: ItemType.FOOD)
         }
         var itemBought by rememberSaveable {
-            mutableStateOf(false)
+            mutableStateOf(itemToEdit?.isPurchased ?: false)
         }
         var itemPrice by rememberSaveable {
-            mutableStateOf("")
+            mutableStateOf(itemToEdit?.price ?: "")
         }
         var itemDescription by rememberSaveable {
-            mutableStateOf("")
+            mutableStateOf(itemToEdit?.description ?: "")
         }
 
         Column(
@@ -313,16 +329,27 @@ private fun AddNewTodoForm(
                     validatePrice(itemPrice)
                     validateTitle(itemTitle)
                     if(!nameErrorState && !priceErrorState && !descriptionErrorState) {
-                        shoppingViewModel.addToList(
-                            ShoppingItem(
-                                UUID.randomUUID().toString(),
-                                itemTitle,
-                                itemDescription,
-                                itemPrice,
-                                if (itemBought) true else false,
-                                itemType
+                        if (itemToEdit == null) {
+                            shoppingViewModel.addToList(
+                                ShoppingItem(
+                                    0,
+                                    itemTitle,
+                                    itemDescription,
+                                    itemPrice,
+                                    itemBought,
+                                    itemType
+                                )
                             )
-                        )
+                        } else {
+                            var itemEdited = itemToEdit.copy(
+                                title = itemTitle,
+                                description = itemDescription,
+                                price = itemPrice,
+                                isPurchased = itemBought,
+                                type = itemType
+                            )
+                            shoppingViewModel.editItem(itemEdited)
+                        }
                         onDialogDismiss()
                         itemTitle = "" //reset fields to empty
                     }

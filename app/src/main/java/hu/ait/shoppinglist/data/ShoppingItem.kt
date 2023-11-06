@@ -1,15 +1,19 @@
 package hu.ait.shoppinglist.data
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import hu.ait.shoppinglist.R
+import java.io.Serializable
 
-
+@Entity(tableName = "itemtable")
 data class ShoppingItem(
-    val id: String,
-    val title:String,
-    val description:String,
-    val price:String,
-    var isPurchased: Boolean,
-    var type:ItemType)
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @ColumnInfo(name = "title") val title:String,
+    @ColumnInfo(name = "description")val description:String,
+    @ColumnInfo(name = "price") val price:String,
+    @ColumnInfo(name = "isPurchased") var isPurchased: Boolean,
+    @ColumnInfo(name = "type") var type:ItemType): Serializable
 
 enum class ItemType {
     FOOD, ELECTRONIC, HOUSEHOLD;
