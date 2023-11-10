@@ -114,7 +114,8 @@ fun ShoppingListScreen(
         Column(modifier = modifier.padding(10.dp)) {
 
             if (showAddItemDialog) {
-                AddNewTodoForm(shoppingViewModel,
+                AddNewTodoForm(
+                    shoppingViewModel,
                     { showAddItemDialog = false },
                     itemToEdit
                 )
@@ -124,7 +125,7 @@ fun ShoppingListScreen(
                 Text(text = "No items")
             else {
                 LazyColumn(modifier = Modifier.fillMaxHeight()) {
-                    items(itemList) {
+                    items(sortByPrice(itemList)) {
                         ItemCard(shoppingItem = it,
                             onRemoveItem = { shoppingViewModel.removeItem(it) },
                             onBoughtCheckChange = { checkState ->
@@ -138,6 +139,16 @@ fun ShoppingListScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+fun sortByPrice(shoppingList: List<ShoppingItem>): List<ShoppingItem> {
+    return shoppingList.sortedWith { a, b ->
+        when {
+            a.price > b.price -> 1
+            a.price < b.price -> -1
+            else -> 0
         }
     }
 }

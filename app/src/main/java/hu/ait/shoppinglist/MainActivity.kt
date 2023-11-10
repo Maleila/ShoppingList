@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
 import hu.ait.shoppinglist.screen.ShoppingListScreen
+import hu.ait.shoppinglist.screen.SplashScreen
 import hu.ait.shoppinglist.ui.theme.ShoppingListTheme
 
 @AndroidEntryPoint
@@ -42,11 +43,14 @@ class MainActivity : ComponentActivity() {
 fun ShoppingAppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = "shoppingList"
+    startDestination: String = "splashscreen"
 ) {
     NavHost(
         modifier = modifier, navController = navController, startDestination = startDestination
     ) {
+        composable("splashscreen") { SplashScreen(
+            onNavigateToMain = { -> navController.navigate("shoppinglist")}
+        )}
         composable("shoppingList") { ShoppingListScreen() }
     }
 }
