@@ -37,7 +37,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,7 +47,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import hu.ait.shoppinglist.data.ShoppingItem
-import java.util.UUID
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.Warning
@@ -95,14 +93,6 @@ fun ShoppingListScreen(
                 }) {
                     Icon(Icons.Filled.Delete, null)
                 }
-//                IconButton(onClick = {
-//                    onNavigateToSummary(
-//                        todoViewModel.getAllTodoNum(),
-//                        todoViewModel.getImportantTodoNum()
-//                    )
-//                }) {
-//                    Icon(Icons.Filled.Info, null)
-//                }
                 IconButton(onClick = {
                     itemToEdit = null
                     showAddItemDialog = true
