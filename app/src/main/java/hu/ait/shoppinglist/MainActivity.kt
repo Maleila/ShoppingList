@@ -8,6 +8,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -39,14 +41,16 @@ class MainActivity : ComponentActivity() {
 fun ShoppingAppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = "splashscreen"
+    startDestination: String = stringResource(R.string.splashscreen_route)
 ) {
+    var context = LocalContext.current
+
     NavHost(
         modifier = modifier, navController = navController, startDestination = startDestination
     ) {
-        composable("splashscreen") { SplashScreen(
-            onNavigateToMain = { -> navController.navigate("shoppinglist")}
+        composable(context.getString(R.string.splashscreen_route)) { SplashScreen(
+            onNavigateToMain = { -> navController.navigate(context.getString(R.string.shoppinglist_route))}
         )}
-        composable("shoppingList") { ShoppingListScreen() }
+        composable(context.getString(R.string.shoppinglist_route)) { ShoppingListScreen() }
     }
 }

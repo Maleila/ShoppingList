@@ -19,9 +19,6 @@ interface ShoppingDAO {
     @Query("SELECT COUNT(*) from itemtable")
     suspend fun getAllItemsNum(): Int
 
-//    @Query("""SELECT COUNT(*) from itemtable WHERE todopriority="HIGH"""")
-//    suspend fun getImportantTodosNum(): Int
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(item: ShoppingItem)
 

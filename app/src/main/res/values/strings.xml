@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">ShoppingList</string>
+    <string name="top_app_bar_text">Shopping List</string>
+    <string name="no_items_text">No items</string>
+    <string name="price_error_text">This field can be number only</string>
+    <string name="name_error_text">Please enter an item name</string>
+    <string name="description_error_text">Please enter an item description</string>
+    <string name="content_description_error">error</string>
+    <string name="item_name_text">Item name</string>
+    <string name="price_text">Price</string>
+    <string name="description_text">Description</string>
+    <string name="food_dropdown_text">Food</string>
+    <string name="electronic_dropdown_text">Electronic</string>
+    <string name="household_dropdown_text">Household</string>
+    <string name="bought_checkbox_text">Bought</string>
+    <string name="save_button_text">Save</string>
+    <string name="content_description_type">Type</string>
+    <string name="dollar_sign_text">$</string>
+    <string name="content_description_delete">Delete</string>
+    <string name="content_description_edit">Edit</string>
+    <string name="content_description_less">Less</string>
+    <string name="content_description_more">More</string>
+    <string name="app_name_text"><![CDATA[List&Go]]></string>
+    <string name="content_description_splash">Splash</string>
+    <string name="splashscreen_route">splashscreen</string>
+    <string name="shoppinglist_route">shoppinglist</string>
 </resources>

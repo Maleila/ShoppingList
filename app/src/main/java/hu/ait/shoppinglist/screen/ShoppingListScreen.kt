@@ -57,8 +57,11 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.navigation.compose.hiltViewModel
+import hu.ait.shoppinglist.R
 import hu.ait.shoppinglist.data.ItemType
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,7 +85,7 @@ fun ShoppingListScreen(
     Column {
         TopAppBar(
             title = {
-                Text("Shopping List")
+                Text(stringResource(R.string.top_app_bar_text))
             },
             colors = TopAppBarDefaults.smallTopAppBarColors(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer
@@ -112,7 +115,7 @@ fun ShoppingListScreen(
             }
 
             if (itemList.isEmpty())
-                Text(text = "No items")
+                Text(text = stringResource(R.string.no_items_text))
             else {
                 LazyColumn(modifier = Modifier.fillMaxHeight()) {
                     items(sortByPrice(itemList)) {
@@ -136,8 +139,8 @@ fun ShoppingListScreen(
 fun sortByPrice(shoppingList: List<ShoppingItem>): List<ShoppingItem> {
     return shoppingList.sortedWith { a, b ->
         when {
-            a.price > b.price -> 1
-            a.price < b.price -> -1
+            a.price.toInt() > b.price.toInt() -> 1
+            a.price.toInt() < b.price.toInt() -> -1
             else -> 0
         }
     }
@@ -150,6 +153,9 @@ private fun AddNewTodoForm(
     onDialogDismiss: () -> Unit = {},
     itemToEdit: ShoppingItem? = null
 ) {
+
+    var context = LocalContext.current
+
     var nameErrorState by rememberSaveable {
         mutableStateOf(false)
     }
@@ -171,18 +177,14 @@ private fun AddNewTodoForm(
 
     fun validatePrice(text: String) {
         val allDigits = text.all { char -> char.isDigit() }
-        errorText = "This field can be number only"
-        if(!allDigits || text.trim() =="") {
-            priceErrorState = true
-        } else {
-            priceErrorState = false
-        }
+        errorText = context.getString(R.string.price_error_text)
+        priceErrorState = !allDigits || text.trim() == ""
     }
 
     fun validateTitle(text: String) {
         if (text.trim() == "") {
             nameErrorState = true
-            nameErrorText = "Please enter an item name"
+            nameErrorText = context.getString(R.string.name_error_text)
         } else {
             nameErrorState = false
         }
@@ -191,7 +193,7 @@ private fun AddNewTodoForm(
     fun validateDescription(text: String) {
         if (text.trim() == "") {
             descriptionErrorState = true
-            descriptionErrorText = "Please enter an item name"
+            descriptionErrorText = context.getString(R.string.description_error_text)
         } else {
             descriptionErrorState = false
         }
@@ -230,7 +232,7 @@ private fun AddNewTodoForm(
                 trailingIcon = {
                     if (nameErrorState) {
                         Icon(
-                            Icons.Filled.Warning, "error",
+                            Icons.Filled.Warning, stringResource(R.string.content_description_error),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
@@ -239,7 +241,7 @@ private fun AddNewTodoForm(
                     itemTitle = it
                     validateTitle(itemTitle)
                 },
-                label = { Text(text = "Item name") }
+                label = { Text(text = stringResource(R.string.item_name_text)) }
             )
             if (nameErrorState) {
                 Text(
@@ -256,7 +258,7 @@ private fun AddNewTodoForm(
                 trailingIcon = {
                     if (priceErrorState) {
                         Icon(
-                            Icons.Filled.Warning, "error",
+                            Icons.Filled.Warning, stringResource(R.string.content_description_error),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
@@ -265,7 +267,7 @@ private fun AddNewTodoForm(
                     itemPrice = it
                     validatePrice(itemPrice)
                 },
-                label = { Text(text = "Price") }
+                label = { Text(text = stringResource(R.string.price_text)) }
             )
             if (priceErrorState) {
                 Text(
@@ -281,7 +283,7 @@ private fun AddNewTodoForm(
                 trailingIcon = {
                     if (descriptionErrorState) {
                         Icon(
-                            Icons.Filled.Warning, "error",
+                            Icons.Filled.Warning, stringResource(R.string.content_description_error),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
@@ -290,7 +292,7 @@ private fun AddNewTodoForm(
                     itemDescription = it
                     validateDescription(itemDescription)
                 },
-                label = { Text(text = "Description") }
+                label = { Text(text = stringResource(R.string.description_text)) }
             )
             if (descriptionErrorState) {
                 Text(
@@ -301,12 +303,15 @@ private fun AddNewTodoForm(
                 )
             }
             SpinnerSample(
-                listOf("Food", "Electronic", "Household"),
-                preselected = "Food",
+                listOf(stringResource(R.string.food_dropdown_text),
+                    stringResource(R.string.electronic_dropdown_text),
+                    stringResource(R.string.household_dropdown_text)
+                ),
+                preselected = stringResource(R.string.food_dropdown_text),
                 onSelectionChanged = {
-                    if(it == "Food") {
+                    if(it == context.getString(R.string.food_dropdown_text)) {
                         itemType = ItemType.FOOD
-                    } else if(it == "Electronic") {
+                    } else if(it == context.getString(R.string.electronic_dropdown_text)) {
                         itemType = ItemType.ELECTRONIC
                     } else {
                         itemType = ItemType.HOUSEHOLD
@@ -321,7 +326,7 @@ private fun AddNewTodoForm(
                 Checkbox(checked = itemBought, onCheckedChange = {
                     itemBought = it
                 })
-                Text(text = "Bought")
+                Text(text = stringResource(R.string.bought_checkbox_text))
             }
 
             Row {
@@ -355,7 +360,7 @@ private fun AddNewTodoForm(
                         itemTitle = "" //reset fields to empty
                     }
                 }) {
-                    Text(text = "Save")
+                    Text(text = stringResource(R.string.save_button_text))
                 }
 
             }
@@ -378,7 +383,7 @@ fun ItemCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 10.dp
         ),
-        modifier = Modifier.padding(5.dp)
+        modifier = Modifier.padding(10.dp)
     ) {
         var expanded by rememberSaveable {
             mutableStateOf(false)
@@ -392,38 +397,41 @@ fun ItemCard(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painter = painterResource(id = shoppingItem.type.getIcon()),
-                    contentDescription = "Type",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .padding(end = 10.dp)
-                )
-                Column {
-                    Text(shoppingItem.title, modifier = Modifier.fillMaxWidth(0.2f))
-                    Text(
-                        text = shoppingItem.description,
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                        )
+                Row(
+                    Modifier.fillMaxWidth(0.6f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = shoppingItem.type.getIcon()),
+                        contentDescription = stringResource(R.string.content_description_type),
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(end = 10.dp)
                     )
-                    Text(
-                        text = "$" + shoppingItem.price.toString(),
-                        style = TextStyle(
-                            fontSize = 12.sp,
+                    Column {
+                        Text(shoppingItem.title)
+                        Text(
+                            text = shoppingItem.description,
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                            )
                         )
-                    )
-
+                        Text(
+                            text = stringResource(R.string.dollar_sign_text) + shoppingItem.price.toString(),
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.fillMaxWidth(0.8f))
                 }
-                Spacer(modifier = Modifier.fillMaxSize(0.35f))
                 Checkbox(
                     checked = shoppingItem.isPurchased,
                     onCheckedChange = { onBoughtCheckChange(it) }
                 )
-                Spacer(modifier = Modifier.width(10.dp))
                 Icon(
                     imageVector = Icons.Filled.Delete,
-                    contentDescription = "Delete",
+                    contentDescription = stringResource(R.string.content_description_delete),
                     modifier = Modifier.clickable {
                         onRemoveItem()
                     },
@@ -431,7 +439,7 @@ fun ItemCard(
                 )
                 Icon(
                     imageVector = Icons.Filled.Build,
-                    contentDescription = "Edit",
+                    contentDescription = stringResource(R.string.content_description_edit),
                     modifier = Modifier.clickable {
                         onEditItem(shoppingItem)
                     },
@@ -442,9 +450,9 @@ fun ItemCard(
                         imageVector = if (expanded)
                             Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                         contentDescription = if (expanded) {
-                            "Less"
+                            stringResource(R.string.content_description_less)
                         } else {
-                            "More"
+                            stringResource(R.string.content_description_more)
                         }
                     )
                 }
