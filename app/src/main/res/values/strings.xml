@@ -3,8 +3,8 @@
     <string name="top_app_bar_text">Shopping List</string>
     <string name="no_items_text">No items</string>
     <string name="price_error_text">This field can be number only</string>
-    <string name="name_error_text">Please enter an item name</string>
-    <string name="description_error_text">Please enter an item description</string>
+    <string name="name_error_text">Please enter a brief item name</string>
+    <string name="description_error_text">Please enter a brief item description</string>
     <string name="content_description_error">error</string>
     <string name="item_name_text">Item name</string>
     <string name="price_text">Price</string>

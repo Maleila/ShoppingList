@@ -8,19 +8,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -56,7 +52,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -75,8 +70,6 @@ fun ShoppingListScreen(
     }
 
     val itemList by shoppingViewModel.getAllShoppingList().collectAsState(emptyList())
-
-    val coroutineScope = rememberCoroutineScope()
 
     var itemToEdit: ShoppingItem? by rememberSaveable {
         mutableStateOf(null)
@@ -153,7 +146,6 @@ private fun AddNewTodoForm(
     onDialogDismiss: () -> Unit = {},
     itemToEdit: ShoppingItem? = null
 ) {
-
     var context = LocalContext.current
 
     var nameErrorState by rememberSaveable {
@@ -178,11 +170,11 @@ private fun AddNewTodoForm(
     fun validatePrice(text: String) {
         val allDigits = text.all { char -> char.isDigit() }
         errorText = context.getString(R.string.price_error_text)
-        priceErrorState = !allDigits || text.trim() == ""
+        priceErrorState = !allDigits || text.length > 9 || text.trim() == ""
     }
 
     fun validateTitle(text: String) {
-        if (text.trim() == "") {
+        if (text.trim() == "" || text.length > 30) {
             nameErrorState = true
             nameErrorText = context.getString(R.string.name_error_text)
         } else {
@@ -191,7 +183,7 @@ private fun AddNewTodoForm(
     }
 
     fun validateDescription(text: String) {
-        if (text.trim() == "") {
+        if (text.trim() == "" || text.length > 30) {
             descriptionErrorState = true
             descriptionErrorText = context.getString(R.string.description_error_text)
         } else {
@@ -229,6 +221,7 @@ private fun AddNewTodoForm(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = itemTitle,
+                singleLine = true,
                 trailingIcon = {
                     if (nameErrorState) {
                         Icon(
@@ -255,6 +248,7 @@ private fun AddNewTodoForm(
                 modifier = Modifier.fillMaxWidth(),
                 value = itemPrice,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                singleLine = true,
                 trailingIcon = {
                     if (priceErrorState) {
                         Icon(
@@ -280,6 +274,7 @@ private fun AddNewTodoForm(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = itemDescription,
+                singleLine = true,
                 trailingIcon = {
                     if (descriptionErrorState) {
                         Icon(
@@ -385,9 +380,6 @@ fun ItemCard(
         ),
         modifier = Modifier.padding(10.dp)
     ) {
-        var expanded by rememberSaveable {
-            mutableStateOf(false)
-        }
         Column(
             modifier = Modifier.padding(20.dp)
         ) {
@@ -417,7 +409,7 @@ fun ItemCard(
                             )
                         )
                         Text(
-                            text = stringResource(R.string.dollar_sign_text) + shoppingItem.price.toString(),
+                            text = stringResource(R.string.dollar_sign_text) + shoppingItem.price,
                             style = TextStyle(
                                 fontSize = 12.sp,
                             )
@@ -444,26 +436,6 @@ fun ItemCard(
                         onEditItem(shoppingItem)
                     },
                     tint = Color.Blue
-                )
-                IconButton(onClick = { expanded = !expanded }) {
-                    Icon(
-                        imageVector = if (expanded)
-                            Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                        contentDescription = if (expanded) {
-                            stringResource(R.string.content_description_less)
-                        } else {
-                            stringResource(R.string.content_description_more)
-                        }
-                    )
-                }
-            }
-
-            if (expanded) {
-                Text(
-                    text = "expanded. not sure what goes here tho",
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                    )
                 )
             }
         }
